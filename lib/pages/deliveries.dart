@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../shared/cached_helper.dart';
+import 'detailsPage.dart';
 import 'drawer_widget.dart';
 
 class Deliveries extends StatefulWidget {
@@ -18,7 +21,7 @@ class _DeliveriesState extends State<Deliveries> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      endDrawer:DrawerWidget(),
+
       backgroundColor: Color(0xfff3f4f6),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -38,15 +41,28 @@ class _DeliveriesState extends State<Deliveries> {
             WebView(
               key: _key,
               initialUrl:'https://storeapp.canariapp.com/partner/${token}/orders',
+
               zoomEnabled: false,
               javascriptMode: JavascriptMode.unrestricted,
+              javascriptChannels:<JavascriptChannel>{
+                JavascriptChannel(
+                  name: 'messageHandler',
+                  onMessageReceived: (JavascriptMessage message) {
+                    Map<String, dynamic> data = jsonDecode(message.message);
+                    print(data);
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>DetailsPage(
+                      orderId: data['payload'],
+                      action:data['action'],
+                      title: 'سجل الطلبات',
+                    )), (route) => route.isFirst);
+                  },)},
               onPageFinished: (finish){
                 setState(() {
                   isLoading = false;
                 });
               },
             ),
-            isLoading ?LinearProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2))
+            isLoading ?Center(child: CircularProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2)))
                 : Stack(),
           ],
         ),

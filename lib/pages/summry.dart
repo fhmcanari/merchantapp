@@ -58,7 +58,7 @@ class _SummryState extends State<Summry> {
     super.dispose();
   }
 
-  static const maxSeconds = 10;
+  static const maxSeconds = 20;
   int seconds = maxSeconds;
   Timer timer;
 

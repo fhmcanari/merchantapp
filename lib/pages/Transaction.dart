@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../shared/cached_helper.dart';
+import 'detailsPage.dart';
 import 'drawer_widget.dart';
 
 
@@ -20,7 +21,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Widget build(BuildContext context) {
     String token = Cachehelper.getData(key: "token");
     return Scaffold(
-      endDrawer:DrawerWidget(),
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
@@ -46,9 +46,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   onMessageReceived: (JavascriptMessage message) {
                     Map<String, dynamic> data = jsonDecode(message.message);
                     print(data);
-                    setState(() {
-
-                    });
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>DetailsPage(
+                      orderId: data['payload'],
+                      action:data['action'],
+                      title: 'تحويلات',
+                    )), (route) => route.isFirst);
                   },)},
               onPageFinished: (finish){
                 setState(() {
@@ -56,7 +58,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 });
               },
             ),
-            isLoading ?LinearProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2))
+            isLoading ?Center(child: CircularProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2)))
                 : Stack(),
           ],
         ),

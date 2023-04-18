@@ -1,46 +1,47 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
 import '../shared/cached_helper.dart';
-import 'detailsPage.dart';
 import 'drawer_widget.dart';
 
-class Reports extends StatefulWidget {
-  const Reports({Key key}) : super(key: key);
+class DetailsPage extends StatefulWidget {
+  final orderId;
+  final action;
+  final title;
+   DetailsPage({Key key, this.orderId,this.action, this.title}) : super(key: key);
 
   @override
-  State<Reports> createState() => _ReportsState();
+  State<DetailsPage> createState() => _DetailsPageState();
 }
 
-class _ReportsState extends State<Reports> {
-  final _key = UniqueKey();
+class _DetailsPageState extends State<DetailsPage> {
   bool isLoading=true;
+  final _key = UniqueKey();
   @override
   Widget build(BuildContext context) {
-    String token = Cachehelper.getData(key: "token");
     return Scaffold(
-
-      backgroundColor: Color(0xfff3f4f6),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-         elevation: 0,
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: Text('لوحة القيادة',style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 20
-        ),),
-        iconTheme: IconThemeData(color: Colors.black),
-      ),
-      body:SafeArea(
+        backgroundColor: Color(0xfff3f4f6),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          title: Text('${widget.title}',style: TextStyle(
+              color: Colors.black,
+              fontWeight: FontWeight.bold,
+              fontSize: 20
+          ),),
+          iconTheme: IconThemeData(color: Colors.black),
+        ),
+        body:
+        SafeArea(
           child: Stack(
             children: <Widget>[
               WebView(
                 key: _key,
-                initialUrl:'https://storeapp.canariapp.com/partner/${token}/dashboard',
+                initialUrl:'https://storeapp.canariapp.com/partner/${Cachehelper.getData(key: "token")}/${widget.action}/show/${widget.orderId}',
                 zoomEnabled: false,
                 javascriptMode: JavascriptMode.unrestricted,
                 javascriptChannels:<JavascriptChannel>{
@@ -49,11 +50,9 @@ class _ReportsState extends State<Reports> {
                     onMessageReceived: (JavascriptMessage message) {
                       Map<String, dynamic> data = jsonDecode(message.message);
                       print(data);
-                      Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>DetailsPage(
-                        orderId: data['payload'],
-                        action:data['action'],
-                        title: 'لوحة القيادة',
-                      )), (route) => route.isFirst);
+                      setState(() {
+
+                      });
                     },)},
                 onPageFinished: (finish){
                   setState(() {
@@ -66,6 +65,6 @@ class _ReportsState extends State<Reports> {
             ],
           ),
         ),
-    );
+      );
   }
 }

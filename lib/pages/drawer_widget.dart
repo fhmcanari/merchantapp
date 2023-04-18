@@ -1,11 +1,8 @@
-import 'package:backofficeapp/pages/askrider.dart';
 import 'package:backofficeapp/pages/deliveries.dart';
 import 'package:backofficeapp/pages/homelayout.dart';
-import 'package:backofficeapp/pages/orders.dart';
 import 'package:backofficeapp/pages/reports.dart';
 import 'package:backofficeapp/pages/shifts.dart';
 import 'package:flutter/material.dart';
-
 import '../shared/cached_helper.dart';
 import 'Transaction.dart';
 
@@ -18,15 +15,16 @@ class DrawerWidget extends StatefulWidget {
 }
 
 class _DrawerWidgetState extends State<DrawerWidget> {
+
   @override
   Widget build(BuildContext context) {
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Drawer(
         child: Padding(
           padding: const EdgeInsets.only(left: 15,right: 20),
           child: ListView(
-
             padding: EdgeInsets.only(top: 100),
             children: [
                // SizedBox(height: 80,),
@@ -41,7 +39,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.only(left: 15),
                 child: Column(
@@ -62,54 +60,26 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 ),
               ),
               SizedBox(height: 30,),
-              Padding(
-                padding: const EdgeInsets.only(left: 13),
-                child: GestureDetector(
-                  onTap: (){
-                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomeLayout()), (route) => route.isFirst);
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('الطلبات اليوم',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,)),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 25,),
-              Padding(
-                padding: const EdgeInsets.only(left: 13),
-                child: GestureDetector(
-                  onTap: (){
 
-                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Deliveries()), (route) => route.isFirst);
-
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text('سجل الطلبات',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 25,),
-              Padding(
-                padding: const EdgeInsets.only(left: 13),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                        onTap:(){
-                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Shifts()), (route) => route.isFirst);
-                        },
-                        child: Text('الفواتير',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
-                  ],
-                ),
-              ),
+              // MenuItem(context,1,'',),
+              // SizedBox(height: 25,),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 13),
+              //   child: GestureDetector(
+              //     onTap: (){
+              //
+              //       Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Deliveries()), (route) => route.isFirst);
+              //
+              //     },
+              //     child: Row(
+              //       mainAxisAlignment: MainAxisAlignment.start,
+              //       crossAxisAlignment: CrossAxisAlignment.end,
+              //       children: [
+              //         Text('سجل الطلبات',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
+              //       ],
+              //     ),
+              //   ),
+              // ),
               // SizedBox(height: 25,),
               // Padding(
               //   padding: const EdgeInsets.only(left: 13),
@@ -119,48 +89,76 @@ class _DrawerWidgetState extends State<DrawerWidget> {
               //     children: [
               //       GestureDetector(
               //           onTap:(){
-              //             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Askrider()), (route) => route.isFirst);
+              //             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Shifts()), (route) => route.isFirst);
               //           },
-              //           child: Text('اطلب Canaries',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+              //           child: Text('الفواتير',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
               //     ],
               //   ),
               // ),
-
-              SizedBox(height: 25,),
-              Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                        onTap:(){
-                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Reports()), (route) => route.isFirst);
-                        },
-                        child: Text('لوحة القيادة',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 25,),
-              Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                        onTap:(){
-                          Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>TransactionScreen()), (route) => route.isFirst);
-                        },
-                        child: Text('تحويلات',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
-                  ],
-                ),
-              ),
+              // SizedBox(height: 25,),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 15),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.start,
+              //     crossAxisAlignment: CrossAxisAlignment.end,
+              //     children: [
+              //       GestureDetector(
+              //           onTap:(){
+              //             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>Reports()), (route) => route.isFirst);
+              //           },
+              //           child: Text('لوحة القيادة',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+              //     ],
+              //   ),
+              // ),
+              //
+              // SizedBox(height: 25,),
+              // Padding(
+              //   padding: const EdgeInsets.only(left: 15),
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.start,
+              //     crossAxisAlignment: CrossAxisAlignment.end,
+              //     children: [
+              //       GestureDetector(
+              //           onTap:(){
+              //             Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>TransactionScreen()), (route) => route.isFirst);
+              //           },
+              //           child: Text('تحويلات',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold))),
+              //     ],
+              //   ),
+              // ),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget MenuItem(BuildContext context,int id,String title,bool selected) {
+    return Padding(
+              padding: const EdgeInsets.only(left: 13),
+              child: GestureDetector(
+                onTap: (){
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomeLayout()), (route) => route.isFirst);
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text('الطلبات اليوم',style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,)),
+                  ],
+                ),
+              ),
+            );
+  }
+
+}
+
+
+
+enum DrawerSections {
+  homelayout,
+  deliveries,
+  shift,
+  raports,
+  transaction,
 }

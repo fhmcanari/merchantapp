@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../shared/cached_helper.dart';
+import 'detailsPage.dart';
 import 'drawer_widget.dart';
 
 class Askrider extends StatefulWidget {
@@ -41,6 +44,18 @@ class _AskriderState extends State<Askrider> {
               key: _key,
               initialUrl:'https://storeapp.canariapp.com/partner/${token}/askrider',
               zoomEnabled: false,
+              javascriptChannels:<JavascriptChannel>{
+                JavascriptChannel(
+                  name: 'messageHandler',
+                  onMessageReceived: (JavascriptMessage message) {
+                    Map<String, dynamic> data = jsonDecode(message.message);
+                    print(data);
+                    Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>DetailsPage(
+                      orderId: data['payload'],
+                      action:data['action'],
+
+                    )), (route) => route.isFirst);
+                  },)},
               javascriptMode: JavascriptMode.unrestricted,
               onPageFinished: (finish){
                 setState(() {
@@ -48,7 +63,7 @@ class _AskriderState extends State<Askrider> {
                 });
               },
             ),
-            isLoading ?LinearProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2))
+            isLoading ?Center(child: CircularProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2)))
                 : Stack(),
           ],
         ),

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../shared/cached_helper.dart';
+import 'detailsPage.dart';
 import 'drawer_widget.dart';
 
 class Shifts extends StatefulWidget {
@@ -23,7 +26,6 @@ class _ShiftsState extends State<Shifts> with SingleTickerProviderStateMixin{
   Widget build(BuildContext context) {
     String token = Cachehelper.getData(key: "token");
     return Scaffold(
-      endDrawer:DrawerWidget(),
       backgroundColor: Color(0xfff3f4f6),
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -44,13 +46,25 @@ class _ShiftsState extends State<Shifts> with SingleTickerProviderStateMixin{
             initialUrl:'https://storeapp.canariapp.com/partner/${token}/invoices',
             zoomEnabled: false,
             javascriptMode: JavascriptMode.unrestricted,
+            javascriptChannels:<JavascriptChannel>{
+              JavascriptChannel(
+                name: 'messageHandler',
+                onMessageReceived: (JavascriptMessage message) {
+                  Map<String, dynamic> data = jsonDecode(message.message);
+                  print(data);
+                  Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>DetailsPage(
+                    orderId: data['payload'],
+                    action:data['action'],
+                    title: 'الفواتير',
+                  )), (route) => route.isFirst);
+                },)},
             onPageFinished: (finish){
               setState(() {
                 isLoading = false;
               });
             },
           ),
-          isLoading ? LinearProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2))
+          isLoading ? Center(child: CircularProgressIndicator(color: Colors.red,backgroundColor:Color(0xFFFFCDD2)))
               : Stack(),
         ],
       ),

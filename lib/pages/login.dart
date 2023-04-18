@@ -206,7 +206,7 @@ class _LoginState extends State<Login>{
                         Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(5),
-                              color: Colors.blue
+                              color: Color(0xFFfb133a)
                           ),
                           child: Center(
                             child:isloading?Text('تسجيل الدخول',
@@ -260,6 +260,7 @@ class _LoginState extends State<Login>{
                 color: Colors.black,
               )),
           hintText: hintText,
+
           label: Text(label),
           prefixIcon:prefixIcon!=null? Icon(prefixIcon):null,
           suffixIcon: suffixIcon!=null? GestureDetector(
