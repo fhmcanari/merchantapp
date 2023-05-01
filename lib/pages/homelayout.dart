@@ -1,20 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
-import 'package:backofficeapp/pages/detailsPage.dart';
-import 'package:backofficeapp/pages/order_details.dart';
 import 'package:backofficeapp/pages/reports.dart';
 import 'package:backofficeapp/pages/shifts.dart';
+import 'package:backofficeapp/pages/store_dispatch/create.dart';
 import 'package:backofficeapp/pages/summry.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 import '../shared/cached_helper.dart';
 import 'Transaction.dart';
 import 'deliveries.dart';
 import 'drawer_widget.dart';
 import 'orders.dart';
+var container;
+var currentPage = DrawerSections.homelayout;
 Future<void>firebaseMessagingBackgroundHandler(RemoteMessage message)async{
   if (message.notification!=null) {
       print('firebaseMessagingBackgroundHandler');
@@ -23,6 +22,7 @@ Future<void>firebaseMessagingBackgroundHandler(RemoteMessage message)async{
 }
 
 class HomeLayout extends StatefulWidget {
+
   const HomeLayout({Key key}) : super(key: key);
   @override
   State<HomeLayout> createState() => _HomeLayoutState();
@@ -80,7 +80,7 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   @override
   Widget build(BuildContext context){
-    var container;
+
     if (currentPage == DrawerSections.homelayout) {
       container = Orders();
     } else if (currentPage == DrawerSections.deliveries) {
@@ -91,6 +91,9 @@ class _HomeLayoutState extends State<HomeLayout> {
       container = Shifts();
     } else if (currentPage == DrawerSections.transaction) {
       container = TransactionScreen();
+    }
+    else if (currentPage == DrawerSections.askrider) {
+      container = Create();
     }
     return Scaffold(
       endDrawer:Drawer(
@@ -159,6 +162,9 @@ class _HomeLayoutState extends State<HomeLayout> {
           SizedBox(height: 10,),
           menuItem(5, "تحويلات",
               currentPage == DrawerSections.transaction ? true : false),
+          SizedBox(height: 10,),
+          menuItem(6, "طلب مندوب",
+              currentPage == DrawerSections.askrider ? true : false),
         ],
       ),
     );
@@ -185,6 +191,8 @@ class _HomeLayoutState extends State<HomeLayout> {
               currentPage = DrawerSections.raports;
             } else if (id == 5) {
               currentPage = DrawerSections.transaction;
+            }else if (id == 6) {
+              currentPage = DrawerSections.askrider;
             }
           });
         },

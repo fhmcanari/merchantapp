@@ -161,4 +161,5 @@ enum DrawerSections {
   shift,
   raports,
   transaction,
+  askrider,
 }
