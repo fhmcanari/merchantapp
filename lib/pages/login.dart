@@ -1,14 +1,12 @@
 import 'dart:convert';
-import 'dart:io';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import '../shared/cached_helper.dart';
 import 'homelayout.dart';
-
 
 bool isShow = true;
 class Login extends StatefulWidget {
@@ -18,66 +16,15 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login>{
+
   final GlobalKey<FormState> fromkey = GlobalKey<FormState>();
   var PhoneController = TextEditingController();
   var PasswordController = TextEditingController();
-  static final DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
   var fbm = FirebaseMessaging.instance;
   String fcmtoken='';
-  Map<String, dynamic> _deviceData = <String, dynamic>{};
 
-  Future<void> initPlatformState() async {
-    var deviceData = <String, dynamic>{};
-    try {
-      if (Platform.isAndroid) {
-        deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
 
-      } else if (Platform.isIOS) {
-        deviceData = _readIosDeviceInfo(await deviceInfoPlugin.iosInfo);
-      }
-    } on PlatformException {
-      deviceData = <String, dynamic>{
-        'Error:':'Failed to get platform version.'
-      };
-    }
 
-    if (!mounted) return;
-    setState(() {
-      _deviceData = deviceData;
-    });
-  }
-  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
-    return <String, dynamic>{
-      'version.release': build.version.release,
-      'fingerprint': build.host,
-      'h':build.id,
-      'b':build.type,
-      'c':build.device,
-      's':build.model,
-      'e':build.hardware,
-      'y':build.product,
-      'z':build.brand,
-      'A':build.supported32BitAbis
-
-    };
-  }
-  Map<String, dynamic> _readIosDeviceInfo(IosDeviceInfo data) {
-    return <String, dynamic>{
-      'name': data.name,
-      'systemName': data.systemName,
-      'systemVersion': data.systemVersion,
-      'model': data.model,
-      'localizedModel': data.localizedModel,
-      'identifierForVendor': data.identifierForVendor,
-      'isPhysicalDevice': data.isPhysicalDevice,
-      'utsname.sysname:': data.utsname.sysname,
-      'utsname.nodename:': data.utsname.nodename,
-      'utsname.release:': data.utsname.release,
-      'utsname.version:': data.utsname.version,
-      'utsname.machine:': data.utsname.machine,
-      'id':data.identifierForVendor
-    };
-  }
   Future login({payload})async{
     isloading = false;
     final response = await http.post(
@@ -86,31 +33,34 @@ class _LoginState extends State<Login>{
       headers:{'Content-Type':'application/json','Accept':'application/json',},
     ).then((value){
       var data = json.decode(value.body);
+      print('---------------------------------------');
       print(data);
+      print('---------------------------------------');
      setState(() {
        isloading = true;
 
       if(data['message']=='Sign In Successful'){
-        Cachehelper.sharedPreferences.setString("token",data['token']).then((value) {
-          print('token fcm is saved');
+        Cachehelper.sharedPreferences.setInt("id",data['partner']['stores'][0]['id']).then((value){
+          print('id fcm is saved');
         });
 
-        Cachehelper.sharedPreferences.setString("name",data['partner']['name']).then((value) {
-          print('name fcm is saved');
-        });
-        Cachehelper.sharedPreferences.setString("email",data['partner']['email']).then((value) {
-          print('email fcm is saved');
-        });
-        Cachehelper.sharedPreferences.setString("logo",data['partner']['stores'][0]['logo']).then((value) {
-          print('logo fcm is saved');
-        });
+        Cachehelper.sharedPreferences.setString("token",data['token']);
+
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeLayout()));
       }
      });
     }).onError((error, stackTrace){
       print(error);
       setState(() {
-
+        Fluttertoast.showToast(
+            msg: error.toString(),
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            webShowClose:false,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
       });
     });
   }
@@ -119,7 +69,6 @@ class _LoginState extends State<Login>{
 
   @override
   Widget build(BuildContext context){
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -223,8 +172,6 @@ class _LoginState extends State<Login>{
                         ),
                       ),
                       SizedBox(height: 5,),
-
-
                     ],
                   ),
                 ),

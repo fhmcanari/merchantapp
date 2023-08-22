@@ -47,6 +47,14 @@ dependencies:
   url_launcher: ^6.1.4
   flutter_local_notifications: any
   audioplayers: ^0.20.1
+  alarmplayer: any
+  permission_handler: any
+  fluttertoast: any
+  just_audio: any
+  audio_service: any
+  assets_audio_player: any
+
+
 
 dev_dependencies:
   flutter_test:
@@ -72,7 +80,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/
+    - assets/new_order.mp3
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

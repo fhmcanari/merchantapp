@@ -4,7 +4,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'homelayout.dart';
-import 'order_details.dart';
 
 
 class Summry extends StatefulWidget {
@@ -17,44 +16,14 @@ class Summry extends StatefulWidget {
 
 class _SummryState extends State<Summry> {
 
-  AudioPlayer audioPlayer = AudioPlayer();
-  String audioasset = "assets/iphone.mp3";
-  bool isplaying = false;
-  bool audioplayed = false;
-  Uint8List audiobytes;
-
-  void playAudio() async{
-    int timesPlayed = 0;
-    const timestoPlay = 3;
-     await audioPlayer.playBytes(audiobytes).then((player) {
-      audioPlayer.onPlayerCompletion.listen((event) {
-        timesPlayed++;
-        if (timesPlayed >= timestoPlay) {
-          timesPlayed = 0;
-          audioPlayer.stop();
-        } else {
-          audioPlayer.resume();
-        }
-      });
-    });
-
-  }
+  AudioPlayer player;
+  AudioCache cache;
 
 
-
-
-  void stopAudio() async{
-    int result = await audioPlayer.stop();
-    if(result == 1){ //play success
-      print("audio is stoping");
-    }else{
-      print("Error while stop audio.");
-    }
-  }
 
   @override
   void dispose() {
-    audioPlayer.dispose();
+    player.dispose();
     super.dispose();
   }
 
@@ -64,6 +33,7 @@ class _SummryState extends State<Summry> {
 
 
   void start(){
+
    timer = Timer.periodic(Duration(seconds:1), (_) {
      if(seconds>0){
        seconds--;
@@ -73,8 +43,8 @@ class _SummryState extends State<Summry> {
      }else if(seconds==0){
        if (this.mounted) {
          setState(() {
+           stopMusic();
            stop();
-           stopAudio();
            Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomeLayout()), (route) => false);
          });
        }
@@ -94,16 +64,14 @@ class _SummryState extends State<Summry> {
 
   @override
   void initState() {
+    player = AudioPlayer();
+    cache = AudioCache(fixedPlayer: player);
     start();
-    Future.delayed(Duration.zero, () async {
-      ByteData bytes = await rootBundle.load(audioasset);
-      audiobytes = bytes.buffer.asUint8List(bytes.offsetInBytes, bytes.lengthInBytes);
-    }).then((value) {
-      playAudio();
-    });
+
 
     super.initState();
   }
+
 
 
   @override
@@ -156,11 +124,9 @@ class _SummryState extends State<Summry> {
           padding: const EdgeInsets.only(left: 30,right: 30),
           child: GestureDetector(
             onTap: (){
-              stopAudio();
+              stopMusic();
               stop();
-              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>OrderDetails(
-                order_ref: widget.order_ref,
-              )), (route) => route.isFirst);
+              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomeLayout()), (route) => false);
             },
             child: Container(
               height: 60,
@@ -179,6 +145,14 @@ class _SummryState extends State<Summry> {
         ),
       ],
     );
+  }
+  playMusic(String song)
+  { // to play the Audio
+    cache.play(song);
+  }
+  stopMusic()
+  {// to pause the Audio
+    player.pause();
   }
 }
 

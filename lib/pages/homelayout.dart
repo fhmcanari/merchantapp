@@ -1,48 +1,101 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:backofficeapp/pages/reports.dart';
-import 'package:backofficeapp/pages/shifts.dart';
-import 'package:backofficeapp/pages/store_dispatch/create.dart';
 import 'package:backofficeapp/pages/summry.dart';
+import 'package:backofficeapp/pages/transactions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../shared/cached_helper.dart';
-import 'Transaction.dart';
-import 'deliveries.dart';
-import 'drawer_widget.dart';
+import 'package:http/http.dart' as http;
+import 'menus.dart';
 import 'orders.dart';
-var container;
-var currentPage = DrawerSections.homelayout;
+
+
 Future<void>firebaseMessagingBackgroundHandler(RemoteMessage message)async{
   if (message.notification!=null) {
-      print('firebaseMessagingBackgroundHandler');
-      // showLocalNotification('Yay you did it!','Congrats on your first local notification');
+    print('firebaseMessagingBackgroundHandler');
   }
 }
 
-class HomeLayout extends StatefulWidget {
 
+
+class HomeLayout extends StatefulWidget {
   const HomeLayout({Key key}) : super(key: key);
   @override
   State<HomeLayout> createState() => _HomeLayoutState();
 }
 class _HomeLayoutState extends State<HomeLayout> {
-  var currentPage = DrawerSections.homelayout;
+  int id = Cachehelper.getData(key: "id");
+  String storeStatus ;
+  bool isLoading = false;
+  bool switchValue = true;
   var fbm = FirebaseMessaging.instance;
-  final _key = UniqueKey();
-  bool isLoading=true;
   String token = Cachehelper.getData(key: "token");
+  int  SelectedIndex = 0;
+  List<Widget>screens=[
+    Orders(),
+    Menus(),
+    Transaction()
+  ];
 
-  @override
-  void initState() {
+  Future getStoreData() async{
+    isLoading = false;
+    final response = await http.get(
+      Uri.parse('https://api.canariapp.com/v1/partner/merchant/stores'),
+      headers:{
+        'Authorization':'Bearer ${token}',
+        'Accept':'application/json',
+      },
+
+    ).then((value){
+      var stores = json.decode(value.body);
+      isLoading = true;
+      print(stores['data'][0]['working_status']);
+       storeStatus = stores['data'][0]['working_status'];
+      Cachehelper.sharedPreferences.setString("storeStatus",stores['data'][0]['working_status']);
+      setState(() {
+
+      });
+    }).onError((error,stackTrace){
+      print(error);
+    });
+    return response;
+  }
+
+  Future UpdateStatus({working_status})async{
+    print(working_status);
+    final response = await http.put(
+        Uri.parse('https://api.canariapp.com/v1/partner/merchant/stores/${id}'),
+        headers:{
+          'Authorization':'Bearer ${token}',
+          'Accept':'application/json',
+        },
+        body:{
+          'working_status':'${working_status}'
+        }
+    ).then((value){
+      var data = json.decode(value.body);
+      print(data);
+    }).onError((error,stackTrace){
+      print(error);
+    });
+    return response;
+  }
+
+
+
+
+
+    @override
+  void initState(){
+    getStoreData();
+
     FirebaseMessaging.instance.getInitialMessage();
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen((message){
       if (message.notification!=null){
          Map<String, dynamic> jsonMap = jsonDecode(message.data['payload']);
           final order_ref = jsonMap['id'];
-        print(message.notification.body);
-        print(message.data);
         showModalBottomSheet(
           backgroundColor: Color(0xFFfb133a),
             enableDrag: false,
@@ -51,28 +104,8 @@ class _HomeLayoutState extends State<HomeLayout> {
             context: context, builder: (context){
           return Summry(order_ref: order_ref,);
             });
-        // showLocalNotification('Yay you did it!','Congrats on your first local notification');
       }
     },);
-
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      if (message.notification!=null){
-        Map<String, dynamic> jsonMap = jsonDecode(message.data['payload']);
-        final order_ref = jsonMap['id'];
-        showModalBottomSheet(
-            backgroundColor: Color(0xFFfb133a),
-            enableDrag: false,
-            isDismissible: false,
-            isScrollControlled: true,
-            context: context, builder: (context){
-          return Summry(order_ref: order_ref,);
-        });
-        // Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context)=>HomeLayout()), (route) => route.isFirst);
-        // showLocalNotification('Yay you did it!','Congrats on your first local notification');
-      }
-    });
-
-
     fbm.getToken();
     super.initState();
   }
@@ -80,132 +113,69 @@ class _HomeLayoutState extends State<HomeLayout> {
 
   @override
   Widget build(BuildContext context){
-
-    if (currentPage == DrawerSections.homelayout) {
-      container = Orders();
-    } else if (currentPage == DrawerSections.deliveries) {
-      container = Deliveries();
-    } else if (currentPage == DrawerSections.raports) {
-      container = Reports();
-    } else if (currentPage == DrawerSections.shift) {
-      container = Shifts();
-    } else if (currentPage == DrawerSections.transaction) {
-      container = TransactionScreen();
-    }
-    else if (currentPage == DrawerSections.askrider) {
-      container = Create();
-    }
-    return Scaffold(
-      endDrawer:Drawer(
-        child: Padding(
-          padding: const EdgeInsets.only(left: 15,right: 20),
-          child: ListView(
-            padding: EdgeInsets.only(top: 100),
-            children: [
-              // SizedBox(height: 80,),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: CircleAvatar(
-                    maxRadius: 30,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage:NetworkImage('${Cachehelper.getData(key: "logo")}'),
-                  ),
-                ),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        appBar:AppBar(
+          backgroundColor:isLoading?storeStatus=='close'?Colors.red:Colors.green:Colors.grey[300],
+          elevation: 0,
+          title: Padding(
+            padding: const EdgeInsets.only(top: 9,right: 8),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  isLoading? Text(' (${storeStatus=='close'?"مغلق":"مفتوح"})',style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold
+                  ),):SizedBox(height: 0),
+                  Text(' حالة مطعم',style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold
+                  ),),
+                ],
               ),
-              SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text('${Cachehelper.getData(key: "name")}',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16),),
-                    Text('${Cachehelper.getData(key: "email")}',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 11,color: Colors.grey),),
-                  ],),
-              ),
-              SizedBox(height: 20,),
-              Padding(
-                padding: const EdgeInsets.only(right: 0),
-                child: Container(
-                  height: 0.4,
-                  width: double.infinity,
-                  color: Color(0xFFD1D1D1),
-                ),
-              ),
-              SizedBox(height: 30,),
-              MyDrawerList(),
-            ],
+            ),
           ),
+          actions: [
+            isLoading? Padding(
+              padding: const EdgeInsets.only(left: 25),
+              child: CupertinoSwitch(
+                value:storeStatus=='close'?false:true,
+                onChanged: (bool value) {
+                  setState((){
+                    switchValue = value ?? false;
+                    storeStatus = switchValue?'open':'close';
+                    Cachehelper.sharedPreferences.setString("storeStatus",storeStatus).then((value) {
+                      print('status saved');
+                    });
+                    UpdateStatus(working_status:storeStatus);
+                  });
+                },
+              ),
+            ):SizedBox(height: 0),
+          ],
         ),
-      ),
-      body:container
-    );
-  }
-  Widget MyDrawerList() {
-    return Container(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          menuItem(1, "الطلبات اليوم",
-              currentPage == DrawerSections.homelayout ? true : false),
-          SizedBox(height: 10,),
-          menuItem(2, "سجل الطلبات",
-              currentPage == DrawerSections.deliveries ? true : false),
-          SizedBox(height: 10,),
-          menuItem(4, "لوحة القيادة",
-              currentPage == DrawerSections.raports ? true : false),
-          menuItem(3, "الفواتير",
-              currentPage == DrawerSections.shift ? true : false),
-          SizedBox(height: 10,),
-          menuItem(5, "تحويلات",
-              currentPage == DrawerSections.transaction ? true : false),
-          SizedBox(height: 10,),
-          menuItem(6, "طلب مندوب",
-              currentPage == DrawerSections.askrider ? true : false),
-        ],
-      ),
-    );
-  }
-  Widget menuItem(int id, String title, bool selected) {
-    return Container(
-      height:50,
-      decoration: BoxDecoration(
-        color: selected ?  Color(0xFFfb133a) : Colors.grey[50],
-        borderRadius: BorderRadius.circular(5),
-      ),
-
-      child: InkWell(
-        onTap: () {
-          Navigator.pop(context);
-          setState(() {
-            if (id == 1) {
-              currentPage = DrawerSections.homelayout;
-            } else if (id == 2) {
-              currentPage = DrawerSections.deliveries;
-            } else if (id == 3) {
-              currentPage = DrawerSections.shift;
-            } else if (id == 4) {
-              currentPage = DrawerSections.raports;
-            } else if (id == 5) {
-              currentPage = DrawerSections.transaction;
-            }else if (id == 6) {
-              currentPage = DrawerSections.askrider;
-            }
-          });
-        },
-        child:Padding(
-          padding: const EdgeInsets.only(left: 15,right: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(title,style: TextStyle(fontSize: 16,fontWeight: FontWeight.bold,color:  selected ?  Colors.white : Colors.black)),
-            ],
-          ),
-        ),
+          bottomNavigationBar: BottomNavigationBar(
+              showSelectedLabels: true,
+              selectedItemColor:Colors.red,
+              type: BottomNavigationBarType.fixed,
+              onTap: (index){
+                setState(() {
+                  SelectedIndex = index;
+                });
+              },
+              currentIndex: SelectedIndex,
+              items: [
+                BottomNavigationBarItem(icon:Icon(Icons.sticky_note_2_outlined), label: 'الطلبات'),
+                BottomNavigationBarItem(icon:Icon(Icons.delivery_dining_outlined), label: 'تسليمات'),
+                BottomNavigationBarItem(icon:Icon(Icons.timer_outlined),label: 'ساعات'),
+              ]),
+        body:screens[SelectedIndex]
       ),
     );
   }
